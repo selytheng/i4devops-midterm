@@ -1,40 +1,43 @@
 pipeline {
     agent any
+    
+    tools {
+        gradle 'Gradle87'
+    }
 
     stages {
-        stage('Clone Repository') {
+        stage('Clone') {
             steps {
                 git branch: 'main', url: 'https://github.com/selytheng/i4devops-midterm.git'
             }
         }
-
-        stage('Build') {
-            steps {
-                sh './gradlew build'
+        stage('Build'){
+            steps{
+                sh 'gradle clean build'
             }
         }
-
-        stage('Test') {
-            steps {
-                sh './gradlew test'
+        stage('Test'){
+            steps{
+                sh 'gradle test'
             }
         }
     }
-
-    post {
-        always {
-            junit 'build/reports/**/*.xml'
-            archiveArtifacts 'build/libs/*.jar'
-        }
+    post{
         success {
-            emailext body: 'Build successful',
-                     subject: 'Build Success Notification',
-                     to: '6b2d8e13764f87'
+            // Send email notification for success
+            emailext (
+                to: 'recipient@example.com',
+                subject: 'Pipeline Success',
+                body: 'Your Jenkins pipeline has completed successfully.'
+            )
         }
         failure {
-            emailext body: 'Build failed',
-                     subject: 'Build Failure Notification',
-                     to: '6b2d8e13764f87'
+            // Send email notification for failure
+            emailext (
+                to: 'recipient@example.com',
+                subject: 'Pipeline Failure',
+                body: 'Your Jenkins pipeline has failed. Please check the logs for details.'
+            )
         }
     }
 }
